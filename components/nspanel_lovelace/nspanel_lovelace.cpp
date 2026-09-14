@@ -210,6 +210,13 @@ void NSPanelLovelace::start_reparse_mode() {
   this->send_nextion_command("recmod=0");
   this->send_nextion_command("recmod=0");
   this->send_nextion_command("connect");
+  // Consume the connect response here instead of relying on incidental delay
+  // (e.g. an HTTP request in a caller) to let it arrive before it gets
+  // flushed/misread by whatever comes next.
+  std::string response;
+  this->recv_ret_string_(response, 500, false);
+  ESP_LOGV(TAG, "connect response: [%s]",
+           format_hex_pretty(reinterpret_cast<const uint8_t *>(response.data()), response.size()).c_str());
   reparse_mode_ = true;
 }
 
