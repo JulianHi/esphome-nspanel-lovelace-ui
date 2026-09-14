@@ -221,7 +221,7 @@ void NSPanelLovelace::exit_reparse_mode() {
 void NSPanelLovelace::set_baud_rate_(int baud_rate) {
   auto *uart = reinterpret_cast<uart::IDFUARTComponent *>(this->parent_);
   uart->set_baud_rate(baud_rate);
-  uart->setup();
+  uart->apply_settings_live();
 }
 
 }  // namespace nspanel_lovelace
