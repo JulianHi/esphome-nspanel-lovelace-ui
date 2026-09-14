@@ -218,6 +218,31 @@ void NSPanelLovelace::exit_reparse_mode() {
   reparse_mode_ = false;
 }
 
+void NSPanelLovelace::probe_upload_size(int size) {
+  if (!this->reparse_mode_) {
+    this->start_reparse_mode();
+  }
+
+  // Clear serial receive buffer, same as upload_tft() does before sending whmi-wris
+  uint8_t d;
+  while (this->available()) {
+    this->read_byte(&d);
+  }
+
+  char command[64];
+  sprintf(command, "whmi-wris %d,115200,1", size);
+  this->send_nextion_command(command);
+
+  std::string response;
+  ESP_LOGD(TAG, "Probing announced size %d, waiting for response (max 15s)", size);
+  this->recv_ret_string_(response, 15000, true);
+  ESP_LOGD(TAG, "Probe response is [%s]",
+           format_hex_pretty(reinterpret_cast<const uint8_t *>(response.data()), response.size()).c_str());
+
+  // Reset the display cleanly whether or not it acked, so it doesn't sit waiting for data
+  this->soft_reset();
+}
+
 void NSPanelLovelace::set_baud_rate_(int baud_rate) {
   auto *uart = reinterpret_cast<uart::IDFUARTComponent *>(this->parent_);
   uart->set_baud_rate(baud_rate);

@@ -59,6 +59,16 @@ class NSPanelLovelace : public Component, public uart::UARTDevice {
    */
   void upload_tft(const std::string &url);
 
+  /**
+   * Diagnostic only: send a whmi-wris announcing the given size (no real file
+   * behind it), log whatever response comes back (or doesn't, within 15s),
+   * then softreset the Nextion. Always uses the current baud rate (115200) -
+   * does not exercise set_baud_rate_(). Lets you probe whether the display
+   * acks a given announced size without needing to build/host a real file
+   * of that size.
+   */
+  void probe_upload_size(int size);
+
  protected:
   void set_baud_rate_(int baud_rate);
 
